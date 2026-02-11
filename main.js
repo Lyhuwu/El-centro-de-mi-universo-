@@ -68,7 +68,7 @@ createPlanet(2.5, 0, 70, -50, 0xa0e0ff);
 const sofPoints = [
     // S
     { pos: [-16, 6, 0], text: "Nuestra primera vez juntitas❤️", img: "fotos/foto1.jpg", secondary: "" },
-    { pos: [-19, 3, 0], text: "Esta canción me recuerda a ti", img: "", secondary: "fotos/monky_dance.gif", link: "https://spotify.com" },
+    { pos: [-19, 3, 0], text: "Esta canción me recuerda a ti", img: "", secondary: "cancioness.gif""},
     { pos: [-16, 0, 0], text: "Nuestro mesesito conviviendo juntas, día y noche, 24/7", img: "fotos/foto2.jpg", secondary: "" },
     { pos: [-13, -3, 0], text: "Tu carita tan preciosa ayayaya", img: "fotos/foto3.jpg", secondary: "" },
     { pos: [-16, -6, 0], text: "Cocinar juntitas", img: "fotos/foto4.jpg", secondary: "" },
