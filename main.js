@@ -81,7 +81,7 @@ const sofPoints = [
     // F
     { pos: [2, 6, 0], text: "Felicidad es estar contigo", img: "fotos/foto8.jpg", secondary: "" },
     { pos: [2, -6, 0], text: "Pasar tiempo y compartir mis días favoritos contigo", img: "fotos/foto9.jpg", secondary: "" },
-    { pos: [2, 0, 0], text: "Canciones que me recuerda a ti", img: "", secondary: "fotos/pinwi_love.gif", link: "https://spotify.com" },
+    { pos: [2, 0, 0], text: "Canciones que me recuerda a ti", img: "tu_tacto.jpg", secondary: "", link: "" },
     { pos: [7, 0, 0], text: "Verte ser tu misma", img: "fotos/foto10.jpg", secondary: "" },
     // I
     { pos: [12, 4, 0], text: "Sentirme amada sin excepciones", img: "fotos/foto11.jpg", secondary: "" },
