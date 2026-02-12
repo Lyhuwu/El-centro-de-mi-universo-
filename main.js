@@ -68,7 +68,7 @@ function checkLoadStatus() {
         
         if (loadedCount >= totalImages) {
             // ¡TODO LISTO!
-            startBtn.innerText = "Entrar a nuestra galaxia";
+            startBtn.innerText = "¿Quieres observar como se ve para mi?";
             startBtn.disabled = false;
             startBtn.style.opacity = "1";
             startBtn.style.cursor = "pointer";
