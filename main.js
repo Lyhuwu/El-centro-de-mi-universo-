@@ -6,32 +6,97 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
 // --- VARIABLES DE CONTROL ---
 let gameStarted = false;
-let targetZ = 60; 
-let introAnimationFinished = false; 
 let autoRotateTimer = null; 
 let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-// --- 1. LÓGICA DE INTERFAZ (BOTÓN) ---
+// --- 1. LÓGICA DE INTERFAZ Y PRE-CARGA ---
 const startBtn = document.getElementById('start-btn');
 const overlay = document.getElementById('intro-overlay');
 
-// Verificación de seguridad: ¿Existen los elementos?
-if (startBtn && overlay) {
-    startBtn.addEventListener('click', () => {
-        // Al hacer clic, iniciamos la animación visual
-        overlay.classList.add('rolling-up');
+// Deshabilitamos el botón al inicio para cargar assets
+if (startBtn) {
+    startBtn.disabled = true;
+    startBtn.innerText = "Cargando recuerdos... (0%)";
+    startBtn.style.opacity = "0.5";
+    startBtn.style.cursor = "wait";
+}
+
+// --- CONSTELACIÓN SOFI (TUS DATOS) ---
+const sofPoints = [
+    // S
+    { pos: [-16, 6, 0], text: "Nuestra primera vez juntitas❤️", img: "fotos/foto1.jpg", secondary: "" },
+    { pos: [-19, 3, 0], text: "Esta canción me recuerda a ti", img: "", secondary: "fotos/monky_dance.gif", link: "https://spotify.com" },
+    { pos: [-16, 0, 0], text: "Nuestro mesesito conviviendo juntas, día y noche, 24/7", img: "fotos/foto2.jpg", secondary: "" },
+    { pos: [-13, -3, 0], text: "Tu carita tan preciosa ayayaya", img: "fotos/foto3.jpg", secondary: "" },
+    { pos: [-16, -6, 0], text: "Cocinar juntitas", img: "fotos/foto4.jpg", secondary: "" },
+    // O
+    { pos: [-8, 4, 0], text: "Mi estrella con un don tan precioso", img: "fotos/foto5.jpg", secondary: "" },
+    { pos: [-3, 4, 0], text: "Canción que me recuerda mucho a ti", img: "", secondary: "", link: "https://youtube.com" },
+    { pos: [-3, -4, 0], text: "Jugar nuestros juegos preferidos", img: "fotos/foto6.jpg", secondary: "" },
+    { pos: [-8, -4, 0], text: "Tú y yo, por siempre", img: "fotos/foto7.jpg", secondary: "" },
+    { pos: [-8, 4, 0], text: "" },
+    // F
+    { pos: [2, 6, 0], text: "Felicidad es estar contigo", img: "fotos/foto8.jpg", secondary: "" },
+    { pos: [2, -6, 0], text: "Pasar tiempo y compartir mis días favoritos contigo", img: "fotos/foto9.jpe", secondary: "" },
+    { pos: [2, 0, 0], text: "Canciones que me recuerdan a ti", img: "", secondary: "fotos/pinwi_love.gif", link: "https://spotify.com" },
+    { pos: [7, 0, 0], text: "Verte ser tu misma", img: "fotos/foto10.jpe", secondary: "" },
+    // I
+    { pos: [12, 4, 0], text: "Sentirme amada sin excepciones", img: "fotos/foto11.jpe", secondary: "" },
+    { pos: [12, -6, 0], text: "Cualquier cosa me recuerda a ti", img: "fotos/foto12.jpe", secondary: "" },
+    { pos: [12, 7, 0], text: "Tu existencia alegra mi corazón", img: "fotos/foto13.jpe", secondary: "" }
+];
+
+// --- SISTEMA DE PRECARGA DE IMÁGENES ---
+const imagesToLoad = [];
+// Extraemos todas las rutas de imágenes y gifs
+sofPoints.forEach(p => {
+    if (p.img) imagesToLoad.push(p.img);
+    if (p.secondary) imagesToLoad.push(p.secondary);
+});
+
+let loadedCount = 0;
+const totalImages = imagesToLoad.length;
+
+function checkLoadStatus() {
+    loadedCount++;
+    if (startBtn) {
+        // Actualizar porcentaje
+        const percent = Math.floor((loadedCount / totalImages) * 100);
+        startBtn.innerText = `Cargando recuerdos... (${percent}%)`;
         
-        // Esperamos 1.2 segundos a que el pergamino suba
-        setTimeout(() => {
-             overlay.classList.add('fade-out'); // Desvanecer fondo negro
-             gameStarted = true; // ¡INICIAR JUEGO!
-             controls.autoRotate = true; // Empezar a girar
-        }, 1200);
-    });
+        if (loadedCount >= totalImages) {
+            // ¡TODO LISTO!
+            startBtn.innerText = "Entrar a nuestra galaxia";
+            startBtn.disabled = false;
+            startBtn.style.opacity = "1";
+            startBtn.style.cursor = "pointer";
+            
+            // Añadir el evento de clic ahora que está listo
+            startBtn.addEventListener('click', () => {
+                overlay.classList.add('rolling-up');
+                setTimeout(() => {
+                     overlay.classList.add('fade-out');
+                     gameStarted = true;
+                     controls.autoRotate = true; 
+                }, 1200);
+            });
+        }
+    }
+}
+
+// Iniciar la descarga oculta
+if (totalImages === 0) {
+    // Si no hay imágenes, habilitar botón directo
+    checkLoadStatus();
 } else {
-    console.error("Error: No se encontró el botón o el overlay en el HTML");
+    imagesToLoad.forEach(src => {
+        const img = new Image();
+        img.onload = checkLoadStatus;
+        img.onerror = checkLoadStatus; // Si falla una, seguimos igual para no trabar
+        img.src = src;
+    });
 }
 
 // --- 2. ESCENA 3D ---
@@ -41,160 +106,71 @@ const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg')
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// Posición inicial
 camera.position.z = 140; 
 
-// ILUMINACIÓN
-const ambientLight = new THREE.AmbientLight(0x404040, 2); 
-scene.add(ambientLight);
-const sunLight = new THREE.DirectionalLight(0xffffff, 3);
-sunLight.position.set(50, 30, 50);
-scene.add(sunLight);
+const ambientLight = new THREE.AmbientLight(0x404040, 2); scene.add(ambientLight);
+const sunLight = new THREE.DirectionalLight(0xffffff, 3); sunLight.position.set(50, 30, 50); scene.add(sunLight);
 
-// EFECTO BLOOM
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.1;
-bloomPass.strength = 1.8;
-composer.addPass(bloomPass);
+bloomPass.threshold = 0.1; bloomPass.strength = 1.8; composer.addPass(bloomPass);
 
-// FONDO ESTRELLAS
 const starCoords = [];
-for(let i=0; i<5000; i++) {
-    starCoords.push(THREE.MathUtils.randFloatSpread(400), THREE.MathUtils.randFloatSpread(400), THREE.MathUtils.randFloatSpread(400));
-}
+for(let i=0; i<5000; i++) { starCoords.push(THREE.MathUtils.randFloatSpread(400), THREE.MathUtils.randFloatSpread(400), THREE.MathUtils.randFloatSpread(400)); }
 const starGeo = new THREE.BufferGeometry();
 starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
-const backgroundStars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xa0c4ff, size: 0.09 }));
-scene.add(backgroundStars);
+scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xa0c4ff, size: 0.09 })));
 
-// PLANETAS AMBIENTALES
 const ambientPlanets = []; 
-function createIcyPlanet(size, x, y, z) {
+function createPlanet(size, x, y, z, color, isIcy=true) {
     const geo = new THREE.SphereGeometry(size, 32, 32);
-    const mat = new THREE.MeshStandardMaterial({ color: 0xa0e0ff, roughness: 0.2, metalness: 0.8 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    ambientPlanets.push(mesh);
+    const mat = new THREE.MeshStandardMaterial({ color: color, roughness: isIcy ? 0.2 : 0.7, metalness: isIcy ? 0.8 : 0.1 });
+    const mesh = new THREE.Mesh(geo, mat); mesh.position.set(x, y, z); scene.add(mesh); ambientPlanets.push(mesh);
 }
-function createRingedPlanet(size, x, y, z) {
-    const planetGroup = new THREE.Group();
-    const sphereGeo = new THREE.SphereGeometry(size, 32, 32);
-    const sphereMat = new THREE.MeshStandardMaterial({ color: 0x4682b4, roughness: 0.7, flatShading: true });
-    const planet = new THREE.Mesh(sphereGeo, sphereMat);
-    planetGroup.add(planet);
-    const ringGeo = new THREE.RingGeometry(size * 1.4, size * 2, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x87cefa, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2;
-    planetGroup.add(ring);
-    planetGroup.position.set(x, y, z);
-    planetGroup.rotation.x = 0.5;
-    planetGroup.rotation.z = 0.2;
-    scene.add(planetGroup);
-    ambientPlanets.push(planetGroup);
-}
-createRingedPlanet(6, 40, 25, -30);
-createIcyPlanet(4, -50, -20, -10);
-createIcyPlanet(2, -30, 40, 20);
-createIcyPlanet(3, 60, -40, 0);
-createRingedPlanet(8, -70, 50, -60);
-createIcyPlanet(5, 80, 20, -40);
-createIcyPlanet(1.5, -20, -60, 40);
-createRingedPlanet(4, 50, -50, -20);
-createIcyPlanet(2.5, 0, 70, -50);
+// Planetas
+createPlanet(6, 40, 25, -30, 0x4682b4, false);
+createPlanet(4, -50, -20, -10, 0xa0e0ff);
+createPlanet(8, -70, 50, -60, 0x4682b4, false);
+createPlanet(5, 80, 20, -40, 0xa0e0ff);
+createPlanet(2.5, 0, 70, -50, 0xa0e0ff);
 
-// --- CONSTELACIÓN SOFI (REVISADA) ---
-const sofPoints = [
-    // S
-    { pos: [-16, 6, 0], text: "Nuestra primera vez juntitas❤️", img: "fotos/foto1.jpg", secondary: "" },
-    { pos: [-19, 3, 0], text: "Esta canción me recuerda a ti", img: "", secondary: "fotos/cancioness.gif", link: "" },
-    { pos: [-16, 0, 0], text: "Nuestro mesesito conviviendo juntas, día y noche, 24/7", img: "fotos/foto2.jpg", secondary: "" },
-    { pos: [-13, -3, 0], text: "Tu carita tan preciosa ayayaya", img: "fotos/foto3.jpg", secondary: "" },
-    { pos: [-16, -6, 0], text: "Cocinar juntitas", img: "fotos/foto4.jpg", secondary: "" },
-    // O
-    { pos: [-8, 4, 0], text: "Mi estrella con un don tan precioso", img: "fotos/foto5.jpg", secondary: "" },
-    { pos: [-3, 4, 0], text: "Canción que me recuerda mucho a ti", img: "fotos/tus_abachitos.jpg", secondary: "", link: "" },
-    { pos: [-3, -4, 0], text: "Jugar nuestros juegos preferidos", img: "fotos/foto6.jpg", secondary: "" },
-    { pos: [-8, -4, 0], text: "Tú y yo, por siempre", img: "fotos/foto7.jpg", secondary: "" },
-    { pos: [-8, 4, 0], text: "" },
-    // F
-    { pos: [2, 6, 0], text: "Felicidad es estar contigo", img: "fotos/foto8.jpg", secondary: "" },
-    { pos: [2, -6, 0], text: "Pasar tiempo y compartir mis días favoritos contigo", img: "fotos/foto9.jpe", secondary: "" }, 
-    { pos: [2, 0, 0], text: "Canciones que me recuerdan a ti", img: "fotos/tu_tacto.jpg", secondary: "", link: "" },
-    { pos: [7, 0, 0], text: "Verte ser tu misma", img: "fotos/foto10.jpe", secondary: "" },
-    // I
-    { pos: [12, 4, 0], text: "Sentirme amada sin excepciones", img: "fotos/foto11.jpe", secondary: "" },
-    { pos: [12, -6, 0], text: "Cualquier cosa me recuerda a ti", img: "fotos/foto12.jpe", secondary: "" },
-    { pos: [12, 7, 0], text: "Tu existencia alegra mi corazón", img: "fotos/foto13.jpe", secondary: "" }
-];
 
-const visualObjects = []; 
-const hitObjects = [];
-const lineMat = new THREE.LineBasicMaterial({ color: 0x87cefa, transparent: true, opacity: 0.3 });
+const visualObjects = [], hitObjects = [];
 const starBaseMaterial = new THREE.MeshBasicMaterial({ color: 0xe0ffff });
 const hitMaterial = new THREE.MeshBasicMaterial({ visible: false }); 
 
 for (let i = 0; i < sofPoints.length; i++) {
     const p = sofPoints[i];
     if (p.text !== "") {
-        const visualMesh = new THREE.Mesh(new THREE.SphereGeometry(0.6, 24, 24), starBaseMaterial.clone());
-        visualMesh.position.set(...p.pos);
-        scene.add(visualMesh);
-        visualObjects.push(visualMesh);
-        
-        const hitMesh = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 16), hitMaterial);
-        hitMesh.position.set(...p.pos);
-        hitMesh.userData = { text: p.text, img: p.img, secondary: p.secondary, link: p.link }; 
-        scene.add(hitMesh);
-        hitObjects.push(hitMesh);
+        const vMesh = new THREE.Mesh(new THREE.SphereGeometry(0.6, 24, 24), starBaseMaterial.clone());
+        vMesh.position.set(...p.pos); scene.add(vMesh); visualObjects.push(vMesh);
+        const hMesh = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 16), hitMaterial);
+        hMesh.position.set(...p.pos); hMesh.userData = p; scene.add(hMesh); hitObjects.push(hMesh);
     }
     const saltos = [4, 9, 13]; 
     if (i < sofPoints.length - 1 && !saltos.includes(i)) {
         const lGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...p.pos), new THREE.Vector3(...sofPoints[i+1].pos)]);
-        scene.add(new THREE.Line(lGeo, lineMat));
+        scene.add(new THREE.Line(lGeo, new THREE.LineBasicMaterial({ color: 0x87cefa, transparent: true, opacity: 0.3 })));
     }
 }
 
 // CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.enablePan = false; 
-controls.enableZoom = true;
-controls.minDistance = 20; 
-controls.maxDistance = 180; 
-controls.autoRotate = false; 
-controls.autoRotateSpeed = 0.8; 
+controls.enableDamping = true; controls.enablePan = false; controls.autoRotate = false; controls.autoRotateSpeed = 0.8;
 
-// INTERACCIÓN
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-window.addEventListener('pointerdown', (e) => {
-    if (!gameStarted) return;
-    controls.autoRotate = false;
-    if (autoRotateTimer) clearTimeout(autoRotateTimer);
-    isDragging = false;
-    startX = e.clientX;
-    startY = e.clientY;
+window.addEventListener('pointerdown', (e) => { 
+    if (!gameStarted) return; controls.autoRotate = false; if (autoRotateTimer) clearTimeout(autoRotateTimer);
+    isDragging = false; startX = e.clientX; startY = e.clientY;
 });
-
-window.addEventListener('pointermove', (e) => {
-    if (!gameStarted) return;
-    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
-        isDragging = true;
-    }
-});
+window.addEventListener('pointermove', (e) => { if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) isDragging = true; });
 
 window.addEventListener('pointerup', (e) => {
-    if (!gameStarted) return;
-    if (autoRotateTimer) clearTimeout(autoRotateTimer);
+    if (!gameStarted || isDragging) return;
     autoRotateTimer = setTimeout(() => { controls.autoRotate = true; }, 3000);
-
-    if (isDragging) return;
 
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -202,54 +178,30 @@ window.addEventListener('pointerup', (e) => {
     const intersects = raycaster.intersectObjects(hitObjects);
 
     if (intersects.length > 0) {
-        const data = intersects[0].object.userData;
-        document.getElementById('memory-text').innerText = data.text;
-        const imgEl = document.getElementById('memory-img');
-        const secondaryEl = document.getElementById('memory-secondary');
-        const linkEl = document.getElementById('memory-link');
-        
-        if(data.img) { imgEl.src = data.img; imgEl.classList.remove('hidden'); } else { imgEl.classList.add('hidden'); }
-        if(data.secondary) { secondaryEl.src = data.secondary; secondaryEl.classList.remove('hidden'); } else { secondaryEl.classList.add('hidden'); }
-        if(data.link) { linkEl.href = data.link; linkEl.classList.remove('hidden'); } else { linkEl.classList.add('hidden'); }
+        const d = intersects[0].object.userData;
+        document.getElementById('memory-text').innerText = d.text;
+        const iEl = document.getElementById('memory-img');
+        const sEl = document.getElementById('memory-secondary');
+        const lEl = document.getElementById('memory-link');
+
+        if(d.img) { iEl.src = d.img; iEl.classList.remove('hidden'); } else { iEl.classList.add('hidden'); }
+        if(d.secondary) { sEl.src = d.secondary; sEl.classList.remove('hidden'); } else { sEl.classList.add('hidden'); }
+        if(d.link) { lEl.href = d.link; lEl.classList.remove('hidden'); } else { lEl.classList.add('hidden'); }
         
         document.getElementById('memory-modal').classList.remove('hidden');
     }
 });
 
-document.getElementById('close-modal').onclick = () => {
-    document.getElementById('memory-modal').classList.add('hidden');
-};
+document.getElementById('close-modal').onclick = () => document.getElementById('memory-modal').classList.add('hidden');
 
 function animate() {
     requestAnimationFrame(animate);
     const time = Date.now() * 0.001;
 
-    // Entrada cinematográfica
-    if (gameStarted && !introAnimationFinished) {
-        camera.position.z += (targetZ - camera.position.z) * 0.015;
-        if (Math.abs(camera.position.z - targetZ) < 0.5) {
-            introAnimationFinished = true;
-            controls.autoRotate = true; 
-        }
-    }
-
-    backgroundStars.rotation.y += 0.0001;
-    ambientPlanets.forEach((planet, i) => {
-        planet.rotation.y += 0.002 * (i % 2 === 0 ? 1 : -1);
-    });
-    visualObjects.forEach((obj, i) => {
-        obj.scale.setScalar(1 + Math.sin(time * 2 + i) * 0.1);
-        obj.material.color.setHSL(0.55 + Math.sin(time * 0.5 + i) * 0.05, 0.7, 0.8);
-    });
-
-    controls.update();
-    composer.render();
+    // Sin animación de entrada automática, posición fija inicial
+    ambientPlanets.forEach((p, i) => { p.rotation.y += 0.002 * (i % 2 === 0 ? 1 : -1); });
+    visualObjects.forEach((v, i) => { v.scale.setScalar(1 + Math.sin(time * 2 + i) * 0.1); v.material.color.setHSL(0.55 + Math.sin(time * 0.5 + i) * 0.05, 0.7, 0.8); });
+    controls.update(); composer.render();
 }
 animate();
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-});
+window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
