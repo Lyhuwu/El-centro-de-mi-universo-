@@ -33,7 +33,7 @@ const sofPoints = [
     { pos: [-16, -6, 0], text: "Cocinar juntitas", img: "fotos/foto4.jpg", secondary: "" },
     // O
     { pos: [-8, 4, 0], text: "Mi estrella con un don tan precioso", img: "fotos/foto5.jpg", secondary: "" },
-    { pos: [-3, 4, 0], text: "Tus cálidos abachitos mi amor", img: "foto/tus_abachitos.jpg", secondary: "", link: "" },
+    { pos: [-3, 4, 0], text: "Tus cálidos abachitos mi amor", img: "fotos/tus_abachitos.jpg", secondary: "", link: "" },
     { pos: [-3, -4, 0], text: "Jugar nuestros juegos preferidos", img: "fotos/foto6.jpg", secondary: "" },
     { pos: [-8, -4, 0], text: "Compartir algo para sentir que estas conmigo", img: "fotos/foto7.jpg", secondary: "" },
     { pos: [-8, 4, 0], text: "" },
