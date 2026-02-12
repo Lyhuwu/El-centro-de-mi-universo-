@@ -39,13 +39,13 @@ const sofPoints = [
     { pos: [-8, 4, 0], text: "" },
     // F
     { pos: [2, 6, 0], text: "Estar contigo, de las cosas que mas amo en la vida", img: "fotos/foto8.jpg", secondary: "" },
-    { pos: [2, -6, 0], text: "Pasar tiempo y compartir mis días favoritos contigo", img: "fotos/foto9.jpe", secondary: "" },
+    { pos: [2, -6, 0], text: "Pasar tiempo y compartir mis días favoritos contigo", img: "fotos/foto9.jpg", secondary: "" },
     { pos: [2, 0, 0], text: "Canciones que me recuerdan a ti", img: "", secondary: "cancioness.gif", link: "" },
-    { pos: [7, 0, 0], text: "Verte ser tu misma", img: "fotos/foto10.jpe", secondary: "" },
+    { pos: [7, 0, 0], text: "Verte ser tu misma", img: "fotos/foto10.jpg", secondary: "" },
     // I
-    { pos: [12, 4, 0], text: "Sentirme amada sin excepciones", img: "fotos/foto11.jpe", secondary: "" },
-    { pos: [12, -6, 0], text: "Cualquier cosa me recuerda a ti", img: "fotos/foto12.jpe", secondary: "" },
-    { pos: [12, 7, 0], text: "Tu existencia alegra mi corazón", img: "fotos/sentirme_amada.jpe", secondary: "" }
+    { pos: [12, 4, 0], text: "Sentirme amada sin excepciones", img: "fotos/foto11.jpg", secondary: "" },
+    { pos: [12, -6, 0], text: "Cualquier cosa me recuerda a ti", img: "fotos/foto12.jpg", secondary: "" },
+    { pos: [12, 7, 0], text: "Tu existencia alegra mi corazón", img: "fotos/sentirme_amada.jpg", secondary: "" }
 ];
 
 // --- SISTEMA DE PRECARGA DE IMÁGENES ---
